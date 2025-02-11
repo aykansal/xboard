@@ -13,12 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import Image from "next/image";
-import { activityProps, Tweet } from "@/lib/types";
+import { Tweet } from "@/lib/types";
 
 export default function ActivityDashboard() {
   const [username, setUsername] = useState("");
@@ -66,7 +65,7 @@ export default function ActivityDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 font-bold text-4xl md:text-5xl tracking-tight">
+        <h1 className="font-['Press_Start_2P'] text-2xl md:text-3xl bg-clip-text text-transparent bg-gradient-to-r from-[#4a9eff] via-[#6b4aff] to-[#ff4a9e]">
           XBoard
         </h1>
         <p className="mx-auto max-w-2xl text-muted-foreground/80">
@@ -91,32 +90,25 @@ export default function ActivityDashboard() {
           <CardContent>
             <div className="flex sm:flex-row flex-col gap-4">
               <div className="relative flex-1 group">
-                <Search className="group-hover:text-primary top-3 left-3 absolute w-4 h-4 text-muted-foreground transition-colors" />
                 <Input
                   type="text"
                   placeholder="Enter Twitter username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="border-muted-foreground/20 hover:border-muted-foreground/40 focus:border-primary pl-9 transition-all"
+                  className="pixel-input"
                 />
               </div>
               <Button
                 onClick={fetchActivityData}
                 disabled={isLoading || !username.trim()}
-                className="relative min-w-[150px] overflow-hidden group"
+                className="pixel-button"
               >
                 {isLoading ? (
                   <LoadingAnimation />
                 ) : (
                   <>
-                    <Image
-                      src="/X.svg"
-                      alt="X"
-                      width={16}
-                      height={16}
-                      className="mr-2 group-hover:scale-110 transition-transform"
-                    />
+                    <span className="mr-2">{">"}</span>
                     Track Activity
                   </>
                 )}

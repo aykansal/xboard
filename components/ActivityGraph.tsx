@@ -72,19 +72,19 @@ export default function ActivityGraph({ activityData }: activityProps) {
   }, [activityData]);
 
   const getIntensityClass = (count: number) => {
-    if (count === 0) return "bg-[#1a1b26] hover:bg-[#1a1b26]/80";
+    if (count === 0) return "bg-[#1a1b26] hover:bg-[#1a1b26]/80 pixel-borders";
     const intensity = Math.ceil((count / maxCount) * 4);
     switch (intensity) {
       case 1:
-        return "bg-blue-500/30 hover:bg-blue-500/40";
+        return "bg-[#4a9eff] hover:bg-[#4a9eff]/80 pixel-borders";
       case 2:
-        return "bg-blue-500/50 hover:bg-blue-500/60";
+        return "bg-[#6b4aff] hover:bg-[#6b4aff]/80 pixel-borders";
       case 3:
-        return "bg-purple-500/70 hover:bg-purple-500/80";
+        return "bg-[#ff4a9e] hover:bg-[#ff4a9e]/80 pixel-borders";
       case 4:
-        return "bg-pink-500/90 hover:bg-pink-500";
+        return "bg-[#ff4a4a] hover:bg-[#ff4a4a]/80 pixel-borders";
       default:
-        return "bg-[#1a1b26] hover:bg-[#1a1b26]/80";
+        return "bg-[#1a1b26] hover:bg-[#1a1b26]/80 pixel-borders";
     }
   };
 
@@ -116,19 +116,19 @@ export default function ActivityGraph({ activityData }: activityProps) {
   ];
 
   return (
-    <Card className="border-[#30363d] bg-[#0d1117] bg-opacity-95 backdrop-blur-sm text-white">
-      <CardHeader className="border-[#30363d] border-b">
+    <Card className="pixel-card activity-heatmap">
+      <CardHeader className="border-b-2 border-[#30363d]">
         <motion.div
           className="flex justify-between items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <CardTitle className="font-medium text-lg">
-            {totalTweets} tweets in the last year
+          <CardTitle className="font-['Press_Start_2P'] text-sm">
+            {totalTweets} tweets
           </CardTitle>
           {currentHover && (
-            <span className="text-muted-foreground text-sm">
+            <span className="text-muted-foreground text-sm font-['VT323']">
               {currentHover.count} tweets on {formatDate(currentHover.date)}
             </span>
           )}

@@ -20,10 +20,12 @@ export default function RootLayout({
   return (
     <html 
       lang="en" 
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} dark`}
       style={{ fontFamily: `var(--font-geist-sans, ${fallbackFonts})` }}
     >
-      <body>{children}</body>
+      <body className="antialiased font-['VT323'] text-base leading-relaxed">
+        {children}
+      </body>
     </html>
   );
 }
