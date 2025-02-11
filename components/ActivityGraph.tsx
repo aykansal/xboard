@@ -10,16 +10,9 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { activityProps } from "@/lib/types";
 
-interface ActivityGraphProps {
-  data: number[];
-  totalTweets?: number;
-}
-
-export default function ActivityGraph({
-  data,
-  totalTweets,
-}: ActivityGraphProps) {
+export default function ActivityGraph({ activityData }: activityProps) {
   const [calendar, setCalendar] = useState<{ date: Date; count: number }[][]>(
     []
   );
@@ -33,12 +26,31 @@ export default function ActivityGraph({
     // Create calendar data structure
     const today = new Date();
     const calendar: { date: Date; count: number }[][] = [];
-    let maxValue = 0;
+    const dailyCounts = new Map<string, number>();
+
+    // Initialize the dailyCounts map with all dates in the past year
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      dailyCounts.set(dateKey, 0);
+    }
+
+    // Count tweets per day
+    activityData.forEach(tweet => {
+      const tweetDate = new Date(tweet.created_at);
+      const dateKey = tweetDate.toISOString().split('T')[0];
+      if (dailyCounts.has(dateKey)) {
+        dailyCounts.set(dateKey, (dailyCounts.get(dateKey) || 0) + 1);
+      }
+    });
 
     // Initialize 53 columns (weeks)
     for (let week = 0; week < 53; week++) {
       calendar[week] = [];
     }
+
+    let maxValue = 0;
 
     // Fill in the last 53 weeks
     for (let week = 52; week >= 0; week--) {
@@ -46,34 +58,33 @@ export default function ActivityGraph({
         const date = new Date(today);
         date.setHours(0, 0, 0, 0);
         date.setDate(date.getDate() - ((52 - week) * 7 + (6 - day)));
-
-        const dayIndex = week;
-        const count = data[dayIndex * 7 + day] || 0;
+        
+        const dateKey = date.toISOString().split('T')[0];
+        const count = dailyCounts.get(dateKey) || 0;
+        
         calendar[week][day] = { date, count };
-
-        // Update max count for color intensity calculation
         maxValue = Math.max(maxValue, count);
       }
     }
 
     setMaxCount(maxValue);
     setCalendar(calendar);
-  }, [data]);
+  }, [activityData]);
 
   const getIntensityClass = (count: number) => {
-    if (count === 0) return "bg-[#161b22] hover:bg-[#161b22]/80";
+    if (count === 0) return "bg-[#1a1b26] hover:bg-[#1a1b26]/80";
     const intensity = Math.ceil((count / maxCount) * 4);
     switch (intensity) {
       case 1:
-        return "bg-[#0e4429] hover:bg-[#0e4429]/80";
+        return "bg-blue-500/30 hover:bg-blue-500/40";
       case 2:
-        return "bg-[#006d32] hover:bg-[#006d32]/80";
+        return "bg-blue-500/50 hover:bg-blue-500/60";
       case 3:
-        return "bg-[#26a641] hover:bg-[#26a641]/80";
+        return "bg-purple-500/70 hover:bg-purple-500/80";
       case 4:
-        return "bg-[#39d353] hover:bg-[#39d353]/80";
+        return "bg-pink-500/90 hover:bg-pink-500";
       default:
-        return "bg-[#161b22] hover:bg-[#161b22]/80";
+        return "bg-[#1a1b26] hover:bg-[#1a1b26]/80";
     }
   };
 
@@ -85,6 +96,8 @@ export default function ActivityGraph({
       day: "numeric",
     }).format(date);
   };
+
+  const totalTweets = activityData.length;
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -105,15 +118,14 @@ export default function ActivityGraph({
   return (
     <Card className="border-[#30363d] bg-[#0d1117] bg-opacity-95 backdrop-blur-sm text-white">
       <CardHeader className="border-[#30363d] border-b">
-        <motion.div 
+        <motion.div
           className="flex justify-between items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
           <CardTitle className="font-medium text-lg">
-            {totalTweets || data.reduce((sum, count) => sum + count, 0)} tweets
-            in the last year
+            {totalTweets} tweets in the last year
           </CardTitle>
           {currentHover && (
             <span className="text-muted-foreground text-sm">
@@ -123,7 +135,7 @@ export default function ActivityGraph({
         </motion.div>
       </CardHeader>
       <CardContent className="pt-6">
-        <motion.div 
+        <motion.div
           className="flex flex-col gap-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -185,19 +197,25 @@ export default function ActivityGraph({
                                     "hover:scale-125"
                                   )}
                                   role="gridcell"
-                                  aria-label={`${count} tweets on ${formatDate(date)}`}
-                                  onMouseEnter={() => setCurrentHover({ date, count })}
+                                  aria-label={`${count} tweets on ${formatDate(
+                                    date
+                                  )}`}
+                                  onMouseEnter={() =>
+                                    setCurrentHover({ date, count })
+                                  }
                                   onMouseLeave={() => setCurrentHover(null)}
                                 />
                               </motion.div>
                             </TooltipTrigger>
-                            <TooltipContent 
+                            <TooltipContent
                               className="border-[#30363d] bg-[#161b22] text-white"
                               side="top"
                             >
                               <p className="text-sm">
-                                <span className="font-medium">{count} tweets</span> on{" "}
-                                {formatDate(date)}
+                                <span className="font-medium">
+                                  {count} tweets
+                                </span>{" "}
+                                on {formatDate(date)}
                               </p>
                             </TooltipContent>
                           </Tooltip>

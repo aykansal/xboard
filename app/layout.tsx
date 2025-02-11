@@ -1,35 +1,29 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
-import localFont from "next/font/local";
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 
 export const metadata: Metadata = {
   title: "XBoard",
   description:
-    "Track your Twitter activity Heatmap and generate custom banners sotred as NFTs",
+    "Track your X (Twitter) activity with an interactive heatmap and generate custom banners",
 };
 
-const qsLit = localFont({
-  src: "./fonts/QuicksandLight.woff",
-  variable: "--font-qsLit",
-  weight: "300 700",
-});
-
-const qsReg = localFont({
-  src: "./fonts/QuicksandRegular.woff",
-  weight: "300 700",
-  variable: "--font-qsReg",
-});
+// Define fallback system fonts
+const fallbackFonts = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${qsLit.variable} ${qsReg.variable} antialiased`}>
-        {children}
-      </body>
+    <html 
+      lang="en" 
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      style={{ fontFamily: `var(--font-geist-sans, ${fallbackFonts})` }}
+    >
+      <body>{children}</body>
     </html>
   );
 }

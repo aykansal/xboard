@@ -3,13 +3,9 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Image } from "lucide-react"
+import { activityProps } from "@/lib/types"
 
-interface BannerGeneratorProps {
-  username: string
-  activityData: number[]
-}
-
-export default function BannerGenerator({ username, activityData }: BannerGeneratorProps) {
+export default function BannerGenerator({ username, activityData }: activityProps) {
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
 
   const generateBanner = async () => {

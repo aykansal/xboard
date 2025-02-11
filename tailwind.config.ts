@@ -94,7 +94,9 @@ const config: Config = {
 			},
 			fontFamily: {
 				qsLit: 'var(--font-qsLit)',
-				qsReg: 'var(--font-qsReg)'
+				qsReg: 'var(--font-qsReg)',
+				sans: 'var(--font-geist-sans)',
+				mono: 'var(--font-geist-mono)',
 			}
 		}
 	},

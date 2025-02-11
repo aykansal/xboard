@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         const instructions = await tweetResponse?.data?.data?.user_result?.result?.timeline_response?.timeline?.instructions || [];
         const tweetEntries = instructions.find((inst: any) => inst.__typename === "TimelineAddEntries")?.entries || [];
         const ownerTweets: any = [];
-
+        
         // Process each entry in the tweetEntries array
         tweetEntries.forEach((entry: any) => {
             if (entry.content?.__typename === "TimelineTimelineModule") {
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
                             const createdAt = legacy.created_at || "";
                             const tweetId = tweetResult.rest_id || "";
                             const authorUsername = tweetResult.core?.user_result?.result?.legacy?.screen_name || "";
-
+                            
                             // Check if the tweet is authored by the owner
                             if (authorUsername === username) {
                                 ownerTweets.push({
@@ -50,8 +50,8 @@ export async function GET(req: NextRequest) {
                 });
             }
         });
-
-        return NextResponse.json(ownerTweets.length);
+        
+        return NextResponse.json(ownerTweets);
     } catch (error) {
         console.error(error);
         return NextResponse.json({ message: 'Error fetching user tweets', status: 500 });
