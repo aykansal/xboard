@@ -58,10 +58,10 @@ export default function ActivityDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <h1 className="bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500 font-bold text-4xl text-transparent tracking-tight">
+        <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 font-bold text-4xl md:text-5xl tracking-tight">
           Twitter Activity Tracker
         </h1>
-        <p className="mx-auto max-w-2xl text-muted-foreground">
+        <p className="mx-auto max-w-2xl text-muted-foreground/80">
           Visualize your Twitter activity over the past year with a GitHub-style contribution graph.
           Track your posting patterns and generate custom banners.
         </p>
