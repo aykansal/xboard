@@ -1,13 +1,48 @@
-
 import { NextRequest, NextResponse } from "next/server";
 // import instructions from './instructions.json';
 import axios from 'axios';
+import { headers } from "next/headers";
+import { ratelimit } from "@/lib/ratelimit";
+
+// Add these export configurations
+export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export async function GET(req: NextRequest) {
     try {
+        // Get IP from various possible headers
+        const headersList = headers();
+        const forwardedFor = headersList.get("x-forwarded-for");
+        const realIp = headersList.get("x-real-ip");
+        const ip = forwardedFor?.split(',')[0] || realIp || "127.0.0.1";
+        
+        const identifier = `xboard_${ip}`; // Add prefix to make the identifier unique
+        
+        const { success, reset, remaining, limit } = await ratelimit.limit(identifier);
+        
+        if (!success) {
+            const now = Date.now();
+            const resetIn = Math.max(8000, reset - now); // Ensure minimum 20s cooldown
+            
+            return new NextResponse(
+                JSON.stringify({
+                    error: "Rate limit exceeded. Please try again later.",
+                    resetIn,
+                }),
+                {
+                    status: 429,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Reset": resetIn.toString(),
+                        "X-RateLimit-Remaining": remaining.toString(),
+                        "X-RateLimit-Limit": limit.toString(),
+                    },
+                }
+            );
+        }
+
         const { searchParams } = new URL(req.url);
         const username = searchParams.get('username');
-        const limit = searchParams.get('limit');
         const tweetResponse = await axios.get("https://twitter-x.p.rapidapi.com/user/tweetsandreplies", {
             params: {
                 username,
@@ -53,7 +88,7 @@ export async function GET(req: NextRequest) {
         
         return NextResponse.json(ownerTweets);
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ message: 'Error fetching user tweets', status: 500 });
+        console.error("Error fetching tweets:", error);
+        return NextResponse.json({ message: 'Error fetching user tweets', status: 500 }, { status: 500 });
     }
 }

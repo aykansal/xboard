@@ -22,7 +22,7 @@ export default function Footer() {
                 target="_blank"
                 className="pixel-link font-['Press_Start_2P'] text-xs"
               >
-                Aykansal
+                aykansal
               </Link>
             </p>
             <span className="pixel-dot" />

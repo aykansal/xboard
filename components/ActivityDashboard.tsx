@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ActivityGraph from "@/components/ActivityGraph";
@@ -23,18 +23,38 @@ export default function ActivityDashboard() {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState<number | null>(null);
   const [activityData, setActivityData] = useState<Tweet[]>([]);
+  const [lastRequestTime, setLastRequestTime] = useState<number | null>(null);
+  const COOLDOWN_PERIOD = 20000; // 20 seconds in milliseconds
 
   const fetchActivityData = async () => {
-    if (!username.trim()) return;
+    const now = Date.now();
+    
+    // Check if we're still in cooldown
+    if (lastRequestTime && now - lastRequestTime < COOLDOWN_PERIOD) {
+      const remainingCooldown = COOLDOWN_PERIOD - (now - lastRequestTime);
+      setCooldown(remainingCooldown);
+      setError(`Please wait ${Math.ceil(remainingCooldown / 1000)} seconds before trying again.`);
+      return;
+    }
+
+    if (!username.trim() || cooldown) return;
 
     setIsLoading(true);
     setError(null);
+    
     try {
+      setLastRequestTime(now);
       const response = await fetch(`/api/tweets?username=${username}`);
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 429) {
+          const resetIn = parseInt(response.headers.get("X-RateLimit-Reset") || "20000");
+          setCooldown(Math.max(20000, resetIn)); // Ensure minimum 20s cooldown
+          throw new Error(`Please wait ${Math.ceil(resetIn / 1000)} seconds before trying again.`);
+        }
         throw new Error(data.error || "Failed to fetch activity data");
       }
 
@@ -50,6 +70,29 @@ export default function ActivityDashboard() {
       setIsLoading(false);
     }
   };
+
+  // Improved cooldown timer effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (cooldown && cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => {
+          if (!prev || prev <= 1000) {
+            setLastRequestTime(null); // Reset last request time when cooldown ends
+            return null;
+          }
+          return prev - 1000;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [cooldown]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -101,11 +144,16 @@ export default function ActivityDashboard() {
               </div>
               <Button
                 onClick={fetchActivityData}
-                disabled={isLoading || !username.trim()}
+                disabled={isLoading || !username.trim() || !!cooldown}
                 className="pixel-button"
               >
                 {isLoading ? (
                   <LoadingAnimation />
+                ) : cooldown ? (
+                  <>
+                    <span className="mr-2">⏳</span>
+                    Wait {Math.max(1, Math.ceil(cooldown / 1000))}s
+                  </>
                 ) : (
                   <>
                     <span className="mr-2">{">"}</span>
